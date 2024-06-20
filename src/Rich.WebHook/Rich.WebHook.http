@@ -1,0 +1,13 @@
+@Rich.WebHook_HostAddress = http://localhost:5181
+
+GET {{Rich.WebHook_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
+POST{{Rich.WebHook_HostAddress}}/webhook?system="qinglong"
+Content-Type: application/json
+
+{
+    "name": "张三",
+    "age": 25
+}
