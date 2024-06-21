@@ -4,5 +4,8 @@ namespace Rich.WebHook.Repository.Users;
 
 public interface IUserRepository : IRichRepository
 {
-    ValueTask<User?> GetUserByIdAsync(int id);
+    ValueTask<UserInfo?> GetUserByIdAsync(int id);
+    
+    ValueTask<UserInfo?> GetUserByNameAsync(string userName);
+
 }

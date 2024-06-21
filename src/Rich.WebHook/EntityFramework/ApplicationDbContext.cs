@@ -5,8 +5,8 @@ namespace Rich.WebHook.EntityFramework;
 
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
-    public DbSet<User> Users { get; set; }
-    public DbSet<Template?> Templates { get; set; }
+    public DbSet<UserInfo> Users { get; set; }
+    public DbSet<Template> Templates { get; set; }
     public DbSet<UserTemplate> UserTemplates { get; set; }
     public DbSet<HookSetting> HookSettings { get; set; }
 

@@ -1,6 +1,8 @@
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Rich.WebHook.Application;
+using Rich.WebHook.Application.Users;
+using Rich.WebHook.Dmain.Shared.Options;
 using Rich.WebHook.EntityFramework;
 using Rich.WebHook.EntityFramework.SeedData;
 using Rich.WebHook.Repository;
@@ -12,10 +14,7 @@ public static class HookConfigServiceCollectionExtensions
     public static IServiceCollection AddConfig(
         this IServiceCollection services, IConfiguration config)
     {
-        // services.Configure<PositionOptions>(
-        //     config.GetSection(PositionOptions.Position));
-        // services.Configure<ColorOptions>(
-        //     config.GetSection(ColorOptions.Color));
+        services.Configure<JwtOptions>(config.GetSection("Jwt"));
 
         return services;
     }
@@ -23,6 +22,9 @@ public static class HookConfigServiceCollectionExtensions
     public static IServiceCollection AddDependencyGroup(this IServiceCollection services)
     {
         var assembly = Assembly.GetExecutingAssembly();
+
+        services.AddHttpContextAccessor();
+        services.AddTransient<IRichSession, RichSession>();
 
         #region Repository 依赖注入
 

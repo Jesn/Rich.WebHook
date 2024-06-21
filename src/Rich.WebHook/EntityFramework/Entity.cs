@@ -1,4 +1,4 @@
-namespace Rich.WebHook.EntityFramework.Model;
+namespace Rich.WebHook.EntityFramework;
 
 public class Entity
 {

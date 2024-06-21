@@ -1,7 +1,14 @@
+using System.Security.Claims;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using Rich.WebHook.Apis;
 using Rich.WebHook.Application.Users;
+using Rich.WebHook.Model.Users;
 using Rich.WebHook.Model.WebHook;
-using Scriban;
+using Template = Scriban.Template;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,10 +16,58 @@ builder.Services.AddConfig(builder.Configuration)
     .AddDbContextDependencyGroup(builder.Configuration)
     .AddDependencyGroup();
 
+var configuration = builder.Configuration;
+
+builder.Services.AddAuthorization();
+
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Rich.WebHook", Version = "v1" });
+
+    // 配置 JWT 令牌输入
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] { }
+        }
+    });
+});
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = configuration["Jwt:Issuer"],
+            ValidAudience = configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"])),
+            ClockSkew = TimeSpan.FromHours(5)
+        };
+    });
 
 var app = builder.Build();
 // DB迁移+初始化
@@ -25,12 +80,19 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseHttpsRedirection();
+
+app.MapWebHooksApi()
+    .RequireAuthorization();
+
 
 var summaries = new[]
 {
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
 };
+
 
 app.MapGet("/weatherforecast", () =>
     {
@@ -47,21 +109,17 @@ app.MapGet("/weatherforecast", () =>
     .WithName("GetWeatherForecast")
     .WithOpenApi();
 
+app.MapPost("User/Login", async (LoginInput input, IUserApplicationService userApplicationService) =>
+{
+    var token = await userApplicationService.Login(input.UserName, input.PassWord);
+    return Results.Ok(token);
+});
+
+
 // 健康检查
 app.MapGet("Health/Check", () => DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
 
-// 创建WebHook模板
-app.MapPost("webhook/create", async (CreateWebhookInput input, IUserApplicationService userApplicationService) =>
-{
-    // var fileName = $"{Guid.NewGuid():N}.tpl";
-    // if (!string.IsNullOrEmpty(input.TemplateText))
-    //     await File.WriteAllTextAsync($"./Data/Templates/{fileName}",input.TemplateText);
-    //
-    
-    
-    var user = await userApplicationService.GetUserByIdAsync(1);
-    return Results.Ok(new { Message = "Webhook created successfully", User = user });
-});
+
 
 app.MapPost("webhook", ([FromQuery] string system, [FromBody] dynamic data) =>
 {
@@ -72,8 +130,6 @@ app.MapPost("webhook", ([FromQuery] string system, [FromBody] dynamic data) =>
     var result = template.Render(data);
     return Task.FromResult(result);
 });
-
-
 
 
 app.Run();

@@ -87,7 +87,7 @@ namespace Rich.WebHook.Migrations
                     b.ToTable("Templates");
                 });
 
-            modelBuilder.Entity("Rich.WebHook.EntityFramework.Model.User", b =>
+            modelBuilder.Entity("Rich.WebHook.EntityFramework.Model.UserInfo", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -99,7 +99,15 @@ namespace Rich.WebHook.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("PassWordHash")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("PassWordSalt")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("UserName")
                         .IsRequired()
                         .HasColumnType("longtext");
 
