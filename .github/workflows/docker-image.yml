@@ -29,4 +29,5 @@ jobs:
           context: .
           file: ./src/Rich.WebHook/Dockerfile
           push: true
+          tags: richpeople/webhook:latest
 
