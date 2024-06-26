@@ -9,11 +9,8 @@
       - 5002:443
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=https://+:443;http://+:80
-      - ASPNETCORE_Kestrel__Certificates__Default__Password=visual2010
-      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/localhost.pfx
-    #      - ASPNETCORE_Kestrel__Certificates__Default__Password=password
-    #      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/.aspnethttpsaspnetapp.pfx
-    volumes:
-      #            - ~/.aspnet/https:/https:ro
-      - /Users/darren/coding/github/Rich.WebHook/tool/Certificate:/https:ro
+#      - ASPNETCORE_URLS=https://+:443;http://+:80
+#      - ASPNETCORE_Kestrel__Certificates__Default__Password=password
+#      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/.aspnethttpsaspnetapp.pfx
+#    volumes:
+#      - ~/.aspnet/https:/https:ro
