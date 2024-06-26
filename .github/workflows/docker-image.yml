@@ -23,7 +23,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Print current working directory
-        run: pwd && ls -a
+        run: cd /home/runner/work/Rich.WebHook && ls -a
 
       - name: Build and push
         id: docker_build_api
