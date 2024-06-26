@@ -6,7 +6,7 @@ namespace Rich.WebHook.Common;
 /// <summary>
 /// 密码哈希
 /// </summary>
-public class PasswordHasher
+public static class PasswordHasher
 {
     /// <summary>
     /// 创建密码哈希
@@ -43,11 +43,12 @@ public class PasswordHasher
     /// 验证密码
     /// </summary>
     /// <param name="password"></param>
-    /// <param name="saltString"></param>
-    /// <param name="storedHash"></param>
+    /// <param name="passWordSecret"></param>
     /// <returns></returns>
-    public static bool VerifyPasswordWithSalt(string password, string saltString, string storedHash)
+    public static bool VerifyPasswordWithSalt(string password, string passWordSecret)
     {
+        var (saltString, storedHash) = FromBase64(passWordSecret);
+
         using SHA256 sha256 = SHA256.Create();
         // 将盐从字符串转换为字节数组
         var salt = Convert.FromBase64String(saltString);
@@ -63,5 +64,19 @@ public class PasswordHasher
 
         // 将计算出的哈希值与存储的哈希值进行比较
         return Convert.ToBase64String(hash) == storedHash;
+    }
+
+    public static string ToBase64(string salt, string hash)
+    {
+        var passwordSecret = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{salt}|{hash}"));
+        return passwordSecret;
+    }
+
+    public static (string salt, string hash) FromBase64(string passwordSecret)
+    {
+        var base64 = Encoding.UTF8.GetString(Convert.FromBase64String(passwordSecret));
+
+        var split = base64.Split("|");
+        return (split[0], split[1]);
     }
 }

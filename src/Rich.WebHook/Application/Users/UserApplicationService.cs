@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Rich.WebHook.Application.Users.Dto;
 using Rich.WebHook.Common;
 using Rich.WebHook.Dmain.Shared.Const;
 using Rich.WebHook.Dmain.Shared.Options;
@@ -18,6 +19,28 @@ public class UserApplicationService(IUserRepository userRepository, IOptions<Jwt
     private JwtOptions JwtOption { get; } = jwtOptions.Value;
 
     /// <summary>
+    /// 注册用户
+    /// </summary>
+    /// <param name="userName"></param>
+    /// <param name="passWord"></param>
+    /// <param name="email"></param>
+    /// <returns></returns>
+    /// <exception cref="DataException"></exception>
+    public async ValueTask<UserDto> RegisterAsync(string userName, string passWord, string email)
+    {
+        var user = await userRepository.GetUserByNameAsync(userName);
+
+        if (user is not null) throw new DataException("当前用户名已存在");
+
+        var passWordSaltHash = PasswordHasher.HashPasswordWithSalt(passWord);
+        var passWordSecret = PasswordHasher.ToBase64(passWordSaltHash.Item1, passWordSaltHash.Item2);
+        user = await userRepository.AddAsync(userName, passWordSecret, email);
+
+        return new UserDto() { UserId = user.Id, UserName = user.UserName, Email = user.Email };
+    }
+
+
+    /// <summary>
     /// 登录
     /// </summary>
     /// <param name="userName"></param>
@@ -30,14 +53,12 @@ public class UserApplicationService(IUserRepository userRepository, IOptions<Jwt
         if (user is null)
             throw new DataException("未找到该用户");
 
-        var passWordIsOk = PasswordHasher.VerifyPasswordWithSalt(passWord, user.PassWordSalt, user.PassWordHash);
+        var passWordIsOk = PasswordHasher.VerifyPasswordWithSalt(passWord, user.PassWord);
         if (!passWordIsOk)
             throw new DataException("密码不正确");
 
         var token = GenerateJwtToken(user, JwtOption);
-        
-      
-        
+
         return token;
     }
 
@@ -65,7 +86,7 @@ public class UserApplicationService(IUserRepository userRepository, IOptions<Jwt
             claims: claims,
             expires: DateTime.Now.AddMinutes(30),
             signingCredentials: credentials);
-        
+
         // var identity = new ClaimsIdentity(claims, "login");
         // var principal = new ClaimsPrincipal(identity);
         //

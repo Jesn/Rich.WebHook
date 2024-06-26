@@ -12,12 +12,8 @@ public class UserInfo : Entity
     /// <summary>
     /// 
     /// </summary>
-    public string PassWordSalt { get; set; }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public string PassWordHash { get; set; }
+    public string PassWord { get; set; }
+    
 
     /// <summary>
     /// 邮箱

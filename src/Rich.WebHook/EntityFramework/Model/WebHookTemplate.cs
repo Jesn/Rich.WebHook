@@ -1,6 +1,6 @@
 namespace Rich.WebHook.EntityFramework.Model;
 
-public class Template : Entity
+public class WebHookTemplate : Entity
 {
     /// <summary>
     /// 模板名称

@@ -12,7 +12,7 @@ namespace Rich.WebHook.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Templates",
+                name: "WebHookTemplates",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -33,7 +33,7 @@ namespace Rich.WebHook.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Templates");
+                name: "WebHookTemplates");
         }
     }
 }

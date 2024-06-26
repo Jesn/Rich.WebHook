@@ -1,14 +1,10 @@
-using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Rich.WebHook.Apis;
-using Rich.WebHook.Application.Users;
-using Rich.WebHook.Model.Users;
-using Rich.WebHook.Model.WebHook;
-using Template = Scriban.Template;
+using Scriban;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -80,57 +76,17 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseAuthentication();
-app.UseAuthorization();
 app.UseHttpsRedirection();
 
-app.MapWebHooksApi()
-    .RequireAuthorization();
-
-
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-
-app.MapGet("/weatherforecast", () =>
-    {
-        var forecast = Enumerable.Range(1, 5).Select(index =>
-                new WeatherForecast
-                (
-                    DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                    Random.Shared.Next(-20, 55),
-                    summaries[Random.Shared.Next(summaries.Length)]
-                ))
-            .ToArray();
-        return forecast;
-    })
-    .WithName("GetWeatherForecast")
-    .WithOpenApi();
-
-app.MapPost("User/Login", async (LoginInput input, IUserApplicationService userApplicationService) =>
-{
-    var token = await userApplicationService.Login(input.UserName, input.PassWord);
-    return Results.Ok(token);
-});
-
-
 // 健康检查
-app.MapGet("Health/Check", () => DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+app.MapGet("Health/Check", () => "ok");
 
+app.MapAccountApi();
+app.MapWebHooksApi();
+app.MapTemplateApi();
 
-
-app.MapPost("webhook", ([FromQuery] string system, [FromBody] dynamic data) =>
-{
-    // 定义模板
-    var template = Template.Parse(@"Hello {{ name }}! You are {{ age }} years . ");
-
-    // 渲染模板，传入myObject作为数据上下文
-    var result = template.Render(data);
-    return Task.FromResult(result);
-});
-
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.Run();
 

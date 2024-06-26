@@ -2,6 +2,7 @@ using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Rich.WebHook.Application;
 using Rich.WebHook.Application.Users;
+using Rich.WebHook.Common.MQ;
 using Rich.WebHook.Dmain.Shared.Options;
 using Rich.WebHook.EntityFramework;
 using Rich.WebHook.EntityFramework.SeedData;
@@ -23,8 +24,29 @@ public static class HookConfigServiceCollectionExtensions
     {
         var assembly = Assembly.GetExecutingAssembly();
 
+        services.AddSingleton<IRabbitMqService, RabbitMqService>(sp =>
+            new RabbitMqService("192.168.2.200", 5672, "admin", "visual2010"));
+
+        // 注册 IHttpContextAccessor 服务
         services.AddHttpContextAccessor();
         services.AddTransient<IRichSession, RichSession>();
+
+        #region Application 应用层依赖注入
+
+        var applicationServiceTypes = assembly.GetTypes()
+            .Where(t => t is { IsClass: true, IsAbstract: false } &&
+                        t.GetInterfaces().Contains(typeof(IRichApplicationService)));
+
+        foreach (var applicationServiceType in applicationServiceTypes)
+        {
+            var interfaceType = applicationServiceType.GetInterfaces()
+                .FirstOrDefault(i =>
+                    i != typeof(IRichApplicationService) && typeof(IRichApplicationService).IsAssignableFrom(i));
+            if (interfaceType != null)
+                services.AddTransient(interfaceType, applicationServiceType);
+        }
+
+        #endregion
 
         #region Repository 依赖注入
 
@@ -44,22 +66,6 @@ public static class HookConfigServiceCollectionExtensions
 
         #endregion
 
-        #region Application 应用层依赖注入
-
-        var applicationServiceTypes = assembly.GetTypes()
-            .Where(t => t is { IsClass: true, IsAbstract: false } &&
-                        t.GetInterfaces().Contains(typeof(IRichApplicationService)));
-
-        foreach (var applicationServiceType in applicationServiceTypes)
-        {
-            var interfaceType = applicationServiceType.GetInterfaces()
-                .FirstOrDefault(i =>
-                    i != typeof(IRichApplicationService) && typeof(IRichApplicationService).IsAssignableFrom(i));
-            if (interfaceType != null)
-                services.AddTransient(interfaceType, applicationServiceType);
-        }
-
-        #endregion
 
         return services;
     }

@@ -1,3 +1,4 @@
+using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Rich.WebHook.Common;
 using Rich.WebHook.EntityFramework.Model;
@@ -18,13 +19,13 @@ public class DatabaseInitializer
 
         var passWord = "123456";
         var passSaltHash = PasswordHasher.HashPasswordWithSalt(passWord);
+        var passWordSecret = PasswordHasher.ToBase64(passSaltHash.Item1, passSaltHash.Item2);
 
         dbContext.Users.AddRangeAsync(new UserInfo()
         {
             Id = 1,
             UserName = "admin",
-            PassWordSalt = passSaltHash.Item1,
-            PassWordHash = passSaltHash.Item2,
+            PassWord = passWordSecret,
             Email = "admin@rich.cn"
         });
 

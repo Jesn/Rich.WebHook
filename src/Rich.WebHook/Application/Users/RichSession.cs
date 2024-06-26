@@ -5,14 +5,14 @@ namespace Rich.WebHook.Application.Users;
 public class RichSession(IHttpContextAccessor httpContextAccessor)
     : IRichSession
 {
-    public long? UserId
+    public int? UserId
     {
         get
         {
             var userIdClaim =
                 httpContextAccessor.HttpContext?.User?.Claims.FirstOrDefault(c =>
                     c.Type == ClaimRichConst.UserId);
-            if (userIdClaim == null || !long.TryParse(userIdClaim.Value, out var userId))
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out var userId))
             {
                 return null;
             }

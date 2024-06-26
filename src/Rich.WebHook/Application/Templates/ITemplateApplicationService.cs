@@ -1,8 +1,10 @@
 using System.Xml.Linq;
+using Rich.WebHook.Application.Templates.Dto;
+using Rich.WebHook.EntityFramework.Model;
 
 namespace Rich.WebHook.Application.Templates;
 
 public interface ITemplateApplicationService : IRichApplicationService
 {
-    void AddTemplateAsync();
+    Task<WebHookTemplate> AddAsync(CreateTemplateDto input);
 }

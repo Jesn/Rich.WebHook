@@ -2,7 +2,7 @@ namespace Rich.WebHook.Application.Users;
 
 public interface IRichSession
 {
-    long? UserId { get;}
+    int? UserId { get;}
     string? UserName { get; }
     string? Email { get;  }
 }
