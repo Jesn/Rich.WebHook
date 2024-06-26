@@ -21,11 +21,12 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      -
-        name: Build and push
+
+      - name: Build and push
+        id: docker_build_api
         uses: docker/build-push-action@v4
         with:
-          context: src/Rich.WebHook
-          file: Dockerfile
+          context: .
+          file: ./src/Rich.WebHook/Dockerfile
           push: true
-          tags: webhook:latest
+
