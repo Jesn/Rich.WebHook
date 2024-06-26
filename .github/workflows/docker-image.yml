@@ -26,6 +26,6 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ../src/Rich.WebHook/Dockerfile
+          file: ./src/Rich.WebHook/Dockerfile
           push: true
           tags: webhook:latest
