@@ -31,7 +31,8 @@ jobs:
         id: docker_build_api
         uses: docker/build-push-action@v6
         with:
-          context: ./src/Rich.WebHook
+          context: .
+          file: ./src/Rich.WebHook/Dockerfile
           push: true
           tags: richpeople/webhook:latest
 
