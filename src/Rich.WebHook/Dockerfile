@@ -22,5 +22,14 @@ COPY --from=build /app/publish .
 
 # 使用非root用户运行应用
 RUN adduser -u 5678 -D appuser
+# 设置 localhost.pfx 文件权限
+RUN chown appuser:appuser /app/localhost.pfx && chmod 600 /app/localhost.pfx
+# 切换到 appuser
 USER appuser
+
+# 设置环境变量
+ENV ASPNETCORE_URLS="https://+:443;http://+:80"
+ENV ASPNETCORE_Kestrel__Certificates__Default__Path=/app/localhost.pfx
+ENV ASPNETCORE_Kestrel__Certificates__Default__Password=password
+
 ENTRYPOINT ["dotnet", "Rich.WebHook.dll"]
