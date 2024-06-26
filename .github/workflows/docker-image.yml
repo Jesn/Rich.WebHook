@@ -9,6 +9,8 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
+      - name: checkout
+        uses: actions/checkout@v3
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -23,13 +25,13 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Print current working directory
-        run: cd /home/runner/work/Rich.WebHook && ls -a
+        run: pwd && ls -a
 
       - name: Build and push
         id: docker_build_api
         uses: docker/build-push-action@v6
         with:
-          context: /home/runner/work/Rich.WebHook/Rich.WebHook/src/Rich.WebHook
+          context: ./src/Rich.WebHook
           push: true
           tags: richpeople/webhook:latest
 
