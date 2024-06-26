@@ -23,13 +23,13 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Print current working directory
-        run: pwd
+        run: pwd && ls -a
 
       - name: Build and push
         id: docker_build_api
         uses: docker/build-push-action@v6
         with:
-          context: "/home/runner/work/Rich.WebHook/Rich.WebHook/src/Rich.WebHook"
+          context: /home/runner/work/Rich.WebHook/Rich.WebHook/src/Rich.WebHook
           push: true
           tags: richpeople/webhook:latest
 
