@@ -25,6 +25,11 @@
     <ItemGroup>
       <Folder Include="Data\" />
     </ItemGroup>
+    <ItemGroup>
+        <None Update="data\**\*">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
 
     <ItemGroup>
       <Content Include="..\..\.dockerignore">

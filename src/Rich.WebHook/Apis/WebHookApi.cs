@@ -1,11 +1,6 @@
-using System.Dynamic;
 using System.Text.Json;
-using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Components.Web;
-using Microsoft.AspNetCore.Mvc;
 using Rich.WebHook.Application.WebHooks;
 using Rich.WebHook.Application.WebHooks.Dto;
-using Scriban;
 
 namespace Rich.WebHook.Apis;
 
@@ -33,7 +28,6 @@ public static class WebHookApi
     /// 接收WebHook请求
     /// </summary>
     /// <param name="token"></param>
-    /// <param name="title"></param>
     /// <param name="data"></param>
     /// <param name="webHookApplicationService"></param>
     /// <returns></returns>

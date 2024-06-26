@@ -2,6 +2,7 @@ using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Rich.WebHook.Application;
 using Rich.WebHook.Application.Users;
+using Rich.WebHook.Application.WebHooks;
 using Rich.WebHook.Common.MQ;
 using Rich.WebHook.Dmain.Shared.Options;
 using Rich.WebHook.EntityFramework;

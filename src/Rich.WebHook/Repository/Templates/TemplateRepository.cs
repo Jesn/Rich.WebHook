@@ -26,7 +26,13 @@ public class TemplateRepository(ApplicationDbContext context) : ITemplateReposit
     public async Task<WebHookTemplate> AddAsync(int userId, string name, string fileName, string remark)
     {
         var template = new WebHookTemplate()
-            { Name = name, FileName = fileName, Remark = remark, CreaterId = userId, CreateAt = DateTime.Now };
+        {
+            Name = name,
+            FileName = fileName,
+            Remark = remark,
+            CreaterId = userId,
+            CreateAt = DateTime.Now
+        };
 
         template = (await context.WebHookTemplates.AddAsync(template)).Entity;
         await context.SaveChangesAsync();
