@@ -30,22 +30,7 @@ public class WebhookRepository(ApplicationDbContext context) : IWebhookRepositor
         return webHook;
     }
 
-    /// <summary>
-    /// 更新模板
-    /// </summary>
-    /// <param name="id"></param>
-    /// <param name="templateId"></param>
-    /// <exception cref="DataException"></exception>
-    public async Task UpdateTemplate(int id, int templateId)
-    {
-        var webHook = await context.WebHookSettings.FindAsync(id);
-        if (webHook is null)
-            throw new DataException("未找到该条数据");
-
-        webHook.TemplateId = templateId;
-        await context.SaveChangesAsync();
-    }
-
+    
     /// <summary>
     /// 删除数据
     /// </summary>

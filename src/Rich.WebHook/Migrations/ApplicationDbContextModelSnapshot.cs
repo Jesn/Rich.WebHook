@@ -47,6 +47,32 @@ namespace Rich.WebHook.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("Rich.WebHook.EntityFramework.Model.WebHookReceiver", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Client")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MemberType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Receivers")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("WebHookId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("WebHookReceivers");
+                });
+
             modelBuilder.Entity("Rich.WebHook.EntityFramework.Model.WebHookSetting", b =>
                 {
                     b.Property<int>("Id")
@@ -60,21 +86,27 @@ namespace Rich.WebHook.Migrations
 
                     b.Property<string>("Remark")
                         .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
+
+                    b.Property<string>("TemplateText")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<int>("TemplateId")
-                        .HasColumnType("int");
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("Token")
                         .IsRequired()
-                        .HasColumnType("varchar(255)");
+                        .HasMaxLength(60)
+                        .HasColumnType("varchar(60)");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("TemplateId");
 
                     b.HasIndex("Token")
                         .IsUnique();
@@ -82,37 +114,6 @@ namespace Rich.WebHook.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("WebHookSettings");
-                });
-
-            modelBuilder.Entity("Rich.WebHook.EntityFramework.Model.WebHookTemplate", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("CreateAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("CreaterId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Remark")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("WebHookTemplates");
                 });
 #pragma warning restore 612, 618
         }

@@ -10,7 +10,5 @@ public interface IWebhookRepository : IRichRepository
 
     Task<WebHookSetting?> AddAsync(WebHookSetting model);
 
-    Task UpdateTemplate(int id, int templateId);
-
     Task Delete(int id);
 }

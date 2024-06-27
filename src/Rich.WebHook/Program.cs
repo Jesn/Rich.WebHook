@@ -1,18 +1,31 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Rich.WebHook.Apis;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddConfig(builder.Configuration)
+builder.Services.Configure<JsonOptions>(options =>
+{
+    options.JsonSerializerOptions.Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
+});
+
+
+builder.Services
+    .AddAgileConfig1(builder.Configuration)
+    .AddOptionConfig(builder.Configuration)
     .AddDbContextDependencyGroup(builder.Configuration)
-    .AddDependencyGroup();
+    .AddDependencyGroup()
+    .AddAuthorization()
+    .AddLogging(loggingBuilder =>
+    {
+        loggingBuilder.AddConsole();
+        loggingBuilder.AddDebug();
+    });
 
 var configuration = builder.Configuration;
-
-builder.Services.AddAuthorization();
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -64,15 +77,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddLogging(loggingBuilder =>
-{
-    loggingBuilder.AddConsole();
-    loggingBuilder.AddDebug();
-});
 
 var app = builder.Build();
-// DB迁移+初始化
-HookConfigServiceCollectionExtensions.InitializeDatabase(app.Services);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -88,9 +94,11 @@ app.MapGet("Health/Check", () => "ok");
 
 app.MapAccountApi();
 app.MapWebHooksApi();
-app.MapTemplateApi();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// DB迁移+初始化
+HookConfigServiceCollectionExtensions.InitializeDatabase(app.Services);
 
 app.Run();

@@ -17,13 +17,11 @@ public static class WebHookApi
         api.MapPost($"/{{token}}", ReceiveDataAsync).AllowAnonymous();
         api.MapGet("/get/{id:int}", GetAsync);
         api.MapPost("/create", CreateAsync);
-        api.MapPost("/updateTemplate", UpdateTemplateAsync);
         api.MapDelete("/delete/{id:int}", DeleteAsync);
 
         return api;
     }
-
-
+    
     /// <summary>
     /// 接收WebHook请求
     /// </summary>
@@ -57,16 +55,10 @@ public static class WebHookApi
     private static async Task<IResult> CreateAsync(CreateWebHookDto input,
         IWebHookApplicationService webHookApplicationService)
     {
-        var result = await webHookApplicationService.CreateAsync(input);
-        return Results.Ok(result);
+        await webHookApplicationService.CreateAsync(input);
+        return Results.Ok();
     }
 
-    private static async Task<IResult> UpdateTemplateAsync(int id, int newTemplateId,
-        IWebHookApplicationService webHookApplicationService)
-    {
-        await webHookApplicationService.UpdateTemplateAsync(id, newTemplateId);
-        return Results.Ok("更新成功");
-    }
 
     /// <summary>
     /// 删除

@@ -6,10 +6,10 @@ namespace Rich.WebHook.EntityFramework;
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
     public DbSet<UserInfo> Users { get; init; }
-    public DbSet<WebHookTemplate> WebHookTemplates { get; init; }
     public DbSet<WebHookSetting> WebHookSettings { get; init; }
 
-
+    public DbSet<WebHookReceiver> WebHookReceivers { get; init; }
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -28,7 +28,16 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         #region WebHokSetting
 
         modelBuilder.Entity<WebHookSetting>()
-            .HasIndex(x => x.TemplateId);
+            .Property(x => x.Title)
+            .HasMaxLength(50)
+            .IsRequired();
+        modelBuilder.Entity<WebHookSetting>()
+            .Property(x => x.Remark)
+            .HasMaxLength(200);
+
+        modelBuilder.Entity<WebHookSetting>()
+            .Property(x => x.Token)
+            .HasMaxLength(60);
 
         modelBuilder.Entity<WebHookSetting>()
             .HasIndex(x => x.UserId);

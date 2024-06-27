@@ -6,5 +6,6 @@ namespace Rich.WebHook.Dmain.Shared.MessageForward;
 public enum ReceiveClientEnum
 {
     WeChat = 0,
-    Telegram = 1
+    Telegram = 1,
+    Mq = 2
 }

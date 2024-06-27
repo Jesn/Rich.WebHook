@@ -12,11 +12,25 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class HookConfigServiceCollectionExtensions
 {
-    public static IServiceCollection AddConfig(
-        this IServiceCollection services, IConfiguration config)
+    /// <summary>
+    /// Agile 配置中心
+    /// </summary>
+    /// <param name="service"></param>
+    /// <param name="configuration"></param>
+    /// <returns></returns>
+    public static IServiceCollection AddAgileConfig1(this IServiceCollection service, IConfiguration configuration)
     {
-        services.Configure<JwtOptions>(config.GetSection("Jwt"));
-        services.Configure<SystemConfigOptions>(config.GetSection("SystemConfig"));
+        if (configuration.GetSection("AgileConfig").Exists())
+            service.AddAgileConfig();
+
+        return service;
+    }
+
+    public static IServiceCollection AddOptionConfig(
+        this IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<JwtOptions>(configuration.GetSection("Jwt"));
+        services.Configure<SystemConfigOptions>(configuration.GetSection("SystemConfig"));
 
         return services;
     }

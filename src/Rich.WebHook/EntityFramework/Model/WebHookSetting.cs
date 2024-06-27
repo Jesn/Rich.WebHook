@@ -11,14 +11,19 @@ public class WebHookSetting : Entity
     public int UserId { get; set; }
 
     /// <summary>
-    /// 模板路径
-    /// </summary>
-    public int TemplateId { get; set; }
-    
-    /// <summary>
     /// 唯一Token
     /// </summary>
     public string Token { get; set; }
+
+    /// <summary>
+    /// 标题
+    /// </summary>
+    public string Title { get; set; }
+
+    /// <summary>
+    /// 模板内容
+    /// </summary>
+    public string TemplateText { get; set; }
 
     /// <summary>
     /// 备注

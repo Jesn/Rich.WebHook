@@ -1,10 +1,12 @@
 using System.Data;
 using System.Text.Json;
+using Microsoft.IdentityModel.Tokens;
 using Rich.WebHook.Application.Users;
 using Rich.WebHook.Application.WebHooks.Dto;
 using Rich.WebHook.Common.MQ;
+using Rich.WebHook.Dmain.Shared.MessageForward;
 using Rich.WebHook.EntityFramework.Model;
-using Rich.WebHook.Repository.Templates;
+using Rich.WebHook.Repository.WebHookReceivers;
 using Rich.WebHook.Repository.Webhooks;
 using Scriban;
 
@@ -15,7 +17,7 @@ public class WebHookApplicationService(
     IRabbitMqService rabbitMqService,
     IRichSession richSession,
     IWebhookRepository webhookRepository,
-    ITemplateRepository templateRepository)
+    IWebHookReceiverRepository webHookReceiverRepository)
     : IWebHookApplicationService
 {
     /// <summary>
@@ -35,65 +37,111 @@ public class WebHookApplicationService(
         var template = Template.Parse(webHookDetail.TemplateText);
         var result = await template.RenderAsync(data);
 
-        var pushData = new
+        if (webHookDetail.Receivers.IsNullOrEmpty())
         {
-            Type = 0,
-            To = new List<string> { "大狗" },
-            Title = title,
-            Content = result
-        };
-        var jsonOptions = new JsonSerializerOptions()
+            throw new Exception("请完善配置信息");
+        }
+
+        if (webHookDetail.Receivers.Any(x => x.Client == ReceiveClientEnum.WeChat))
         {
-            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-        };
-        rabbitMqService.PublishMessage("webhook_chat", "webhook_chat_queue",
-            JsonSerializer.Serialize(pushData, jsonOptions));
+            var receiverItems = webHookDetail.Receivers
+                .Where(r => r.Client == ReceiveClientEnum.WeChat);
+
+            foreach (var receiver in receiverItems)
+            {
+                var pushData = new
+                {
+                    MemberType = receiver.MemberType,
+                    To = receiver.Receivers,
+                    Title = title,
+                    Content = result
+                };
+                rabbitMqService.PublishMessage("webhook_wechat", "webhook_wechat_queue",
+                    JsonSerializer.Serialize(pushData));
+            }
+        }
+
+        if (webHookDetail.Receivers.Any(x => x.Client == ReceiveClientEnum.Mq))
+        {
+            var receiverMq = webHookDetail.Receivers.Where(x => x.Client == ReceiveClientEnum.Mq);
+            foreach (var receiverItem in receiverMq)
+            {
+                var pushData = new
+                {
+                    Title = title,
+                    Content = result
+                };
+                foreach (var receiver in receiverItem.Receivers)
+                {
+                    rabbitMqService.PublishMessage("webhook_mq", receiver,
+                        JsonSerializer.Serialize(pushData));
+                }
+            }
+        }
+
 
         return result;
     }
 
-    public async Task<WebHookSetting?> CreateAsync(CreateWebHookDto input)
+    public async Task CreateAsync(CreateWebHookDto input)
     {
         var webHook = new WebHookSetting()
         {
             UserId = richSession.UserId.Value,
-            TemplateId = input.TemplateId,
+            Title = input.Title,
+            TemplateText = input.TemplateText,
             Remark = input.Remark,
             Token = $"{Guid.NewGuid():N}",
             CreateTime = DateTime.Now
         };
         webHook = await webhookRepository.AddAsync(webHook);
-        return webHook;
+
+        var receivers = new List<WebHookReceiver>();
+        foreach (var item in input.Receivers)
+        {
+            receivers.Add(new WebHookReceiver(webHook.Id, item.Client, item.Receivers, item.MemberType));
+        }
+
+        await webHookReceiverRepository.BatchAsync(receivers);
     }
 
     public async Task<WebHookDetailDto?> GetAsync(int id)
     {
         var webHook = await webhookRepository.GetAsync(id);
-        var outPut = await FillWebHookDetail(webHook);
+        var receivers = await webHookReceiverRepository.GetReceiversByWebHookId(id);
+        var outPut = await FillWebHookDetail(webHook, receivers);
 
         return outPut;
     }
 
-    private async Task<WebHookDetailDto> FillWebHookDetail(WebHookSetting? webHook)
+    private Task<WebHookDetailDto> FillWebHookDetail(WebHookSetting? webHook, IEnumerable<WebHookReceiver> receivers)
     {
         if (webHook is null) throw new Exception("数据不存在");
-        var template = await templateRepository.GetAsync(webHook.TemplateId);
-        if (template is null) throw new Exception("未找到模板数据");
+        // var template = await templateRepository.GetAsync(webHook.TemplateId);
+        // if (template is null) throw new Exception("未找到模板数据");
         // var filePath = Path.Combine(".", "Data", "WebHookTemplates", template.FileName);
         // var templateText = await File.ReadAllTextAsync(filePath);
 
         var httpContext = httpContextAccessor.HttpContext;
         var host = $"{httpContext?.Request.Scheme}://{httpContext?.Request.Host}";
         var webHookUrl = $"{host}/api/webhook/{webHook.Token}";
-        // webHook.Id, templateText, webHook.Remark, webHookUrl
+
         var outPut = new WebHookDetailDto
         {
             Id = webHook.Id,
-            TemplateText = template.Content,
+            Title = webHook.Title,
+            TemplateText = webHook.TemplateText,
             Url = webHookUrl,
-            Remark = webHook.Remark
+            Remark = webHook.Remark,
+            Receivers = receivers?.Select(x =>
+                new WebHookReceiverDto()
+                {
+                    Client = x.Client,
+                    MemberType = x.MemberType,
+                    Receivers = x.Receivers
+                }).ToList()
         };
-        return outPut;
+        return Task.FromResult(outPut);
     }
 
     public async Task<WebHookDetailDto?> GetByTokenAsync(string token)
@@ -104,17 +152,14 @@ public class WebHookApplicationService(
             throw new DataException("非法请求");
         }
 
-        var outPut = await FillWebHookDetail(webHook);
+        var receivers = await webHookReceiverRepository.GetReceiversByWebHookId(webHook.Id);
+        var outPut = await FillWebHookDetail(webHook, receivers);
         return outPut;
-    }
-
-    public async Task UpdateTemplateAsync(int id, int templateId)
-    {
-        await webhookRepository.UpdateTemplate(id, templateId);
     }
 
     public async Task DeleteAsync(int id)
     {
         await webhookRepository.Delete(id);
+        await webHookReceiverRepository.DeleteAsync(id);
     }
 }
