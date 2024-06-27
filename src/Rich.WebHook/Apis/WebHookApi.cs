@@ -1,3 +1,4 @@
+using System.Dynamic;
 using System.Text.Json;
 using Rich.WebHook.Application.WebHooks;
 using Rich.WebHook.Application.WebHooks.Dto;
@@ -15,13 +16,14 @@ public static class WebHookApi
             .RequireAuthorization();
 
         api.MapPost($"/{{token}}", ReceiveDataAsync).AllowAnonymous();
+        api.MapPost($"/{{token}}/{{title}}", ReceiveDataTitleAsync).AllowAnonymous();
         api.MapGet("/get/{id:int}", GetAsync);
         api.MapPost("/create", CreateAsync);
         api.MapDelete("/delete/{id:int}", DeleteAsync);
 
         return api;
     }
-    
+
     /// <summary>
     /// 接收WebHook请求
     /// </summary>
@@ -32,17 +34,26 @@ public static class WebHookApi
     private static async Task<IResult> ReceiveDataAsync(string token, dynamic data,
         IWebHookApplicationService webHookApplicationService)
     {
-        string? title;
+        var title = "";
         string jsonData = Convert.ToString(data);
         using (var document = JsonDocument.Parse(jsonData))
         {
-            var root = document.RootElement;
-            // 获取 title 的值
-            title = root.GetProperty("title").GetString();
+            if (document.RootElement.TryGetProperty("title", out JsonElement element))
+            {
+                // 获取 title 的值
+                title = element.GetProperty("title").GetString();
+            }
         }
 
         var result = await webHookApplicationService.ReceiveDataAsync(token, title, data);
 
+        return Results.Ok(result);
+    }
+
+    private static async Task<IResult> ReceiveDataTitleAsync(string token, string title, dynamic data,
+        IWebHookApplicationService webHookApplicationService)
+    {
+        var result = await webHookApplicationService.ReceiveDataAsync(token, title, data);
         return Results.Ok(result);
     }
 
