@@ -8,9 +8,9 @@ namespace Rich.WebHook.Apis;
 /// <summary>
 /// WebHook 接口
 /// </summary>
-public static class WebHookApi
+public class WebHookApi
 {
-    public static RouteGroupBuilder MapWebHooksApi(this IEndpointRouteBuilder app)
+    public RouteGroupBuilder MapWebHooksApi(IEndpointRouteBuilder app)
     {
         var api = app.MapGroup("/api/webhook")
             .RequireAuthorization();
@@ -30,12 +30,16 @@ public static class WebHookApi
     /// <param name="token"></param>
     /// <param name="data"></param>
     /// <param name="webHookApplicationService"></param>
+    /// <param name="logger"></param>
     /// <returns></returns>
     private static async Task<IResult> ReceiveDataAsync(string token, dynamic data,
-        IWebHookApplicationService webHookApplicationService)
+        IWebHookApplicationService webHookApplicationService, ILogger<WebHookApi> logger)
     {
         var title = "";
         string jsonData = Convert.ToString(data);
+
+        logger.LogInformation(jsonData);
+
         using (var document = JsonDocument.Parse(jsonData))
         {
             if (document.RootElement.TryGetProperty("title", out var element))
@@ -48,8 +52,11 @@ public static class WebHookApi
     }
 
     private static async Task<IResult> ReceiveDataTitleAsync(string token, string title, dynamic data,
-        IWebHookApplicationService webHookApplicationService)
+        IWebHookApplicationService webHookApplicationService,ILogger<WebHookApi> logger)
     {
+        string jsonData = Convert.ToString(data);
+        logger.LogInformation(jsonData);
+        
         var result = await webHookApplicationService.ReceiveDataAsync(token, title, data);
         return Results.Ok(result);
     }

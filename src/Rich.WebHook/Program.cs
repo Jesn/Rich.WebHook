@@ -25,6 +25,8 @@ builder.Services
         loggingBuilder.AddDebug();
     });
 
+
+builder.Services.AddTransient<WebHookApi>();
 var configuration = builder.Configuration;
 
 // Add services to the container.
@@ -93,7 +95,9 @@ app.UseHttpsRedirection();
 app.MapGet("Health/Check", () => "ok");
 
 app.MapAccountApi();
-app.MapWebHooksApi();
+
+var webHookApi = app.Services.GetRequiredService<WebHookApi>();
+webHookApi.MapWebHooksApi(app);
 
 app.UseAuthentication();
 app.UseAuthorization();
