@@ -38,11 +38,8 @@ public static class WebHookApi
         string jsonData = Convert.ToString(data);
         using (var document = JsonDocument.Parse(jsonData))
         {
-            if (document.RootElement.TryGetProperty("title", out JsonElement element))
-            {
-                // 获取 title 的值
-                title = element.GetProperty("title").GetString();
-            }
+            if (document.RootElement.TryGetProperty("title", out var element))
+                title = element.GetString();
         }
 
         var result = await webHookApplicationService.ReceiveDataAsync(token, title, data);
