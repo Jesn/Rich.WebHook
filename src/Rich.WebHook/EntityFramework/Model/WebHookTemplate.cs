@@ -7,10 +7,7 @@ public class WebHookTemplate : Entity
     /// </summary>
     public string Name { get; set; }
 
-    /// <summary>
-    /// 模板文件名称
-    /// </summary>
-    public string FileName { get; set; }
+    public string Content { get; set; }
 
     /// <summary>
     /// 备注
@@ -21,7 +18,7 @@ public class WebHookTemplate : Entity
     /// 创建人
     /// </summary>
     public int CreaterId { get; set; }
-    
+
     /// <summary>
     /// 创建时间
     /// </summary>

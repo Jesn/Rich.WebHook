@@ -79,8 +79,8 @@ public class WebHookApplicationService(
         if (webHook is null) throw new Exception("数据不存在");
         var template = await templateRepository.GetAsync(webHook.TemplateId);
         if (template is null) throw new Exception("未找到模板数据");
-        var filePath = Path.Combine(".", "Data", "WebHookTemplates", template.FileName);
-        var templateText = await File.ReadAllTextAsync(filePath);
+        // var filePath = Path.Combine(".", "Data", "WebHookTemplates", template.FileName);
+        // var templateText = await File.ReadAllTextAsync(filePath);
 
         var httpContext = httpContextAccessor.HttpContext;
         var host = $"{httpContext?.Request.Scheme}://{httpContext?.Request.Host}";
@@ -89,7 +89,7 @@ public class WebHookApplicationService(
         var outPut = new WebHookDetailDto
         {
             Id = webHook.Id,
-            TemplateText = templateText,
+            TemplateText = template.Content,
             Url = webHookUrl,
             Remark = webHook.Remark
         };

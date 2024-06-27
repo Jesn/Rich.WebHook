@@ -7,7 +7,7 @@ namespace Rich.WebHook.EntityFramework.SeedData;
 
 public class DatabaseInitializer
 {
-    public static void Initialize(ApplicationDbContext dbContext)
+    public static void Initialize(ApplicationDbContext dbContext, ILogger<DatabaseInitializer> logger)
     {
         dbContext.Database.Migrate();
 
@@ -17,7 +17,10 @@ public class DatabaseInitializer
             return;
         }
 
-        var passWord = "123456";
+        var passWord = PasswordHasher.GeneratePassword(15);
+        Console.WriteLine($"当前 admin 账号随机密码:{passWord}");
+        logger.LogInformation($"当前 admin 账号随机密码:{passWord}", ConsoleColor.Red);
+
         var passSaltHash = PasswordHasher.HashPasswordWithSalt(passWord);
         var passWordSecret = PasswordHasher.ToBase64(passSaltHash.Item1, passSaltHash.Item2);
 

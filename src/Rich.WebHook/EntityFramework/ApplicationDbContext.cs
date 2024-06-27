@@ -5,9 +5,9 @@ namespace Rich.WebHook.EntityFramework;
 
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
-    public DbSet<UserInfo> Users { get; set; }
-    public DbSet<WebHookTemplate> WebHookTemplates { get; set; }
-    public DbSet<WebHookSetting> WebHookSettings { get; set; }
+    public DbSet<UserInfo> Users { get; init; }
+    public DbSet<WebHookTemplate> WebHookTemplates { get; init; }
+    public DbSet<WebHookSetting> WebHookSettings { get; init; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

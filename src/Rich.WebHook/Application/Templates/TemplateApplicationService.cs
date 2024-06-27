@@ -21,13 +21,13 @@ public class TemplateApplicationService(
         var userId = richSession.UserId;
         if (userId is null) throw new AuthenticationException("用户未登录");
 
-        var fileName = $"{Guid.NewGuid():N}.tpl";
-        var directoryPath = Path.Combine(".", "Data", "WebHookTemplates");
-        var filePath = Path.Combine(directoryPath, fileName);
-        Directory.CreateDirectory(directoryPath);
+        // var fileName = $"{Guid.NewGuid():N}.tpl";
+        // var directoryPath = Path.Combine(".", "Data", "WebHookTemplates");
+        // var filePath = Path.Combine(directoryPath, fileName);
+        // Directory.CreateDirectory(directoryPath);
+        //
+        // await File.WriteAllTextAsync(filePath, input.TemplateText);
 
-        await File.WriteAllTextAsync(filePath, input.TemplateText);
-
-        return await templateRepository.AddAsync(userId.Value, input.Name, fileName, input.Remark);
+        return await templateRepository.AddAsync(userId.Value, input.Name, input.TemplateText, input.Remark);
     }
 }

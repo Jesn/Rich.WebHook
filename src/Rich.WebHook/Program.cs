@@ -64,6 +64,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+builder.Services.AddLogging(loggingBuilder =>
+{
+    loggingBuilder.AddConsole();
+    loggingBuilder.AddDebug();
+});
+
 var app = builder.Build();
 // DB迁移+初始化
 HookConfigServiceCollectionExtensions.InitializeDatabase(app.Services);

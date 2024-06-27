@@ -8,6 +8,33 @@ namespace Rich.WebHook.Common;
 /// </summary>
 public static class PasswordHasher
 {
+    private static readonly char[] Chars =
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*+-".ToCharArray();
+
+    /// <summary>
+    /// 生成随机密码
+    /// </summary>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException"></exception>
+    public static string GeneratePassword(int length)
+    {
+        if (length <= 0)
+        {
+            throw new ArgumentException("Password length must be greater than zero.", nameof(length));
+        }
+
+        var password = new char[length];
+        var random = new Random();
+
+        for (var i = 0; i < length; i++)
+        {
+            password[i] = Chars[random.Next(Chars.Length)];
+        }
+
+        return new string(password);
+    }
+
     /// <summary>
     /// 创建密码哈希
     /// </summary>
