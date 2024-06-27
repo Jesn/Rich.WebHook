@@ -1,4 +1,6 @@
+using Microsoft.Extensions.Options;
 using Rich.WebHook.Application.Users;
+using Rich.WebHook.Dmain.Shared.Options;
 using Rich.WebHook.Model.Users;
 
 namespace Rich.WebHook.Apis;
@@ -7,11 +9,16 @@ public static class AccountApi
 {
     public static RouteGroupBuilder MapAccountApi(this IEndpointRouteBuilder app)
     {
+        var systemConfigOptions = app.ServiceProvider.GetRequiredService<IOptions<SystemConfigOptions>>();
+
         var api = app.MapGroup("/api/account")
             .RequireAuthorization();
 
+        // 是否开启注册
+        if (systemConfigOptions.Value.IsRegister)
+            api.MapPost("/register", RegisterAsync).AllowAnonymous();
+
         api.MapPost("/login", LoginAsync).AllowAnonymous();
-        api.MapPost("/register", RegisterAsync).AllowAnonymous();
 
         return api;
     }

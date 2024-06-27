@@ -17,6 +17,7 @@ public static class HookConfigServiceCollectionExtensions
         this IServiceCollection services, IConfiguration config)
     {
         services.Configure<JwtOptions>(config.GetSection("Jwt"));
+        services.Configure<SystemConfigOptions>(config.GetSection("SystemConfig"));
 
         return services;
     }
