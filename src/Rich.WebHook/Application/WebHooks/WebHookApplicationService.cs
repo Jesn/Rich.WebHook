@@ -78,8 +78,7 @@ public class WebHookApplicationService(
                 }
             }
         }
-
-
+        
         return result;
     }
 
