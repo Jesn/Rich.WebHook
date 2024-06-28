@@ -126,7 +126,8 @@ public class WebHookApplicationService(
 
     public async Task<WebHookDetailDto?> GetAsync(int id)
     {
-        var webHook = await webhookRepository.GetAsync(id);
+        var userId = richSession.UserId.Value;
+        var webHook = await webhookRepository.GetAsync(userId, id);
         var receivers = await webHookReceiverRepository.GetReceiversByWebHookId(id);
         var outPut = await FillWebHookDetail(webHook, receivers);
 

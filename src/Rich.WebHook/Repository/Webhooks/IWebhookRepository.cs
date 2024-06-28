@@ -4,7 +4,7 @@ namespace Rich.WebHook.Repository.Webhooks;
 
 public interface IWebhookRepository : IRichRepository
 {
-    Task<WebHookSetting?> GetAsync(int id);
+    Task<WebHookSetting?> GetAsync(int userId,int id);
 
     Task<WebHookSetting?> GetByTokenAsync(string token);
 

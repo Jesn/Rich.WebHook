@@ -7,9 +7,11 @@ namespace Rich.WebHook.Repository.Webhooks;
 
 public class WebhookRepository(ApplicationDbContext context) : IWebhookRepository
 {
-    public async Task<WebHookSetting?> GetAsync(int id)
+    private IWebhookRepository _webhookRepositoryImplementation;
+
+    public async Task<WebHookSetting?> GetAsync(int userId, int id)
     {
-        return await context.WebHookSettings.FindAsync(id);
+        return await context.WebHookSettings.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
     }
 
     public async Task<WebHookSetting?> GetByTokenAsync(string token)
@@ -30,7 +32,7 @@ public class WebhookRepository(ApplicationDbContext context) : IWebhookRepositor
         return webHook;
     }
 
-    
+
     /// <summary>
     /// 删除数据
     /// </summary>
