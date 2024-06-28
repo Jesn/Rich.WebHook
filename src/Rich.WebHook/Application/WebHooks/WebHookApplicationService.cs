@@ -1,7 +1,6 @@
 using System.Data;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using Microsoft.IdentityModel.Tokens;
 using Rich.WebHook.Application.Users;
 using Rich.WebHook.Application.WebHooks.Dto;
@@ -35,13 +34,19 @@ public class WebHookApplicationService(
         if (webHookDetail is null)
             throw new Exception("token无效");
 
-        // 模板渲染字段严格区分大小写
-        var template = Template.Parse(webHookDetail.TemplateText);
-        var result = await template.RenderAsync(data);
+        var dataStr = Convert.ToString(data);
 
-        if (webHookDetail.Receivers.IsNullOrEmpty())
+        // 模板渲染字段严格区分大小写
+        var template = webHookDetail.TemplateText.IsNullOrEmpty()
+            ? null
+            : Template.Parse(webHookDetail.TemplateText);
+        var result = template == null
+            ? dataStr
+            : await template.RenderAsync(data);
+
+        if (webHookDetail.Receivers == null)
         {
-            throw new Exception("请完善配置信息");
+            return string.Empty;
         }
 
         if (webHookDetail.Receivers.Any(x => x.Client == ReceiveClientEnum.WeChat))
@@ -68,15 +73,16 @@ public class WebHookApplicationService(
             var receiverMq = webHookDetail.Receivers.Where(x => x.Client == ReceiveClientEnum.Mq);
             foreach (var receiverItem in receiverMq)
             {
-                var pushData = new
-                {
-                    Title = title,
-                    Content = result
-                };
+                // var pushData = new
+                // {
+                //     Title = title,
+                //     Content = result
+                // };
                 foreach (var receiver in receiverItem.Receivers)
                 {
-                    rabbitMqService.PublishMessage("webhook_mq", receiver,
-                        JsonSerializer.Serialize(pushData));
+                    // rabbitMqService.PublishMessage("webhook_mq", receiver,
+                    //     JsonSerializer.Serialize(pushData));
+                    rabbitMqService.PublishMessage("webhook_mq", receiver, result);
                 }
             }
         }
