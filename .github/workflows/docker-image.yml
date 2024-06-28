@@ -34,7 +34,8 @@ jobs:
           context: .
           file: ./src/Rich.WebHook/Dockerfile
           push: true
-          tags: richpeople/webhook:latest
+          platforms: linux/amd64,linux/arm64
+          tags: richpeople/webhook:latest,richpeople/webhook:${{github.sha}}
 
       - name: webhook
         run: |
