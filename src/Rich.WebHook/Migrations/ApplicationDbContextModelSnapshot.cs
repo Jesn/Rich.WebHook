@@ -70,6 +70,8 @@ namespace Rich.WebHook.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("WebHookId");
+
                     b.ToTable("WebHookReceivers");
                 });
 
@@ -114,6 +116,22 @@ namespace Rich.WebHook.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("WebHookSettings");
+                });
+
+            modelBuilder.Entity("Rich.WebHook.EntityFramework.Model.WebHookReceiver", b =>
+                {
+                    b.HasOne("Rich.WebHook.EntityFramework.Model.WebHookSetting", "WebHook")
+                        .WithMany("Receivers")
+                        .HasForeignKey("WebHookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("WebHook");
+                });
+
+            modelBuilder.Entity("Rich.WebHook.EntityFramework.Model.WebHookSetting", b =>
+                {
+                    b.Navigation("Receivers");
                 });
 #pragma warning restore 612, 618
         }

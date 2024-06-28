@@ -17,4 +17,6 @@ public class WebHookReceiver : Entity
     public MemberTypeEnum MemberType { get; set; }
 
     public List<string> Receivers { get; set; }
+
+    public virtual WebHookSetting WebHook { get; set; }
 }

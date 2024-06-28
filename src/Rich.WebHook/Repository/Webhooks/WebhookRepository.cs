@@ -14,6 +14,14 @@ public class WebhookRepository(ApplicationDbContext context) : IWebhookRepositor
         return await context.WebHookSettings.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
     }
 
+    public async Task<List<WebHookSetting>?> GetListWithReceiversAsync(int userId)
+    {
+        return await context.WebHookSettings
+            .Include(x => x.Receivers)
+            .Where(x => x.UserId == userId)
+            .ToListAsync();
+    }
+
     public async Task<WebHookSetting?> GetByTokenAsync(string token)
     {
         var webHook = await context.WebHookSettings.FirstOrDefaultAsync(x => x.Token == token);

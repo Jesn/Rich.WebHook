@@ -12,5 +12,7 @@ public interface IWebHookApplicationService : IRichApplicationService
 
     Task<WebHookDetailDto?> GetByTokenAsync(string token);
 
+    Task<IEnumerable<WebHookDetailDto>?> GetListAsync();
+
     Task DeleteAsync(int id);
 }

@@ -1,3 +1,4 @@
+using System.Reflection.Emit;
 using Microsoft.EntityFrameworkCore;
 using Rich.WebHook.EntityFramework.Model;
 
@@ -9,7 +10,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<WebHookSetting> WebHookSettings { get; init; }
 
     public DbSet<WebHookReceiver> WebHookReceivers { get; init; }
-    
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -45,6 +46,15 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<WebHookSetting>()
             .HasIndex(x => x.Token)
             .IsUnique();
+
+        #endregion
+
+        #region WebHookReceiver
+
+        modelBuilder.Entity<WebHookReceiver>()
+            .HasOne(wr => wr.WebHook)
+            .WithMany(wr => wr.Receivers)
+            .HasForeignKey(wr => wr.WebHookId);
 
         #endregion
     }

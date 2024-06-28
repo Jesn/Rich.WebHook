@@ -35,4 +35,6 @@ public class WebHookSetting : Entity
     /// </summary>
 
     public DateTime CreateTime { get; set; }
+    
+    public virtual ICollection<WebHookReceiver> Receivers { get; set; }
 }

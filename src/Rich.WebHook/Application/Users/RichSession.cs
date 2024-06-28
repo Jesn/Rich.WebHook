@@ -38,4 +38,10 @@ public class RichSession(IHttpContextAccessor httpContextAccessor)
             return email;
         }
     }
+
+    public int GetUserId()
+    {
+        if (UserId == null) throw new UnauthorizedAccessException("Token失效");
+        return UserId.Value;
+    }
 }

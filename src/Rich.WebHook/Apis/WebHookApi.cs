@@ -18,6 +18,7 @@ public class WebHookApi
         api.MapPost($"/{{token}}", ReceiveDataAsync).AllowAnonymous();
         api.MapPost($"/{{token}}/{{title}}", ReceiveDataTitleAsync).AllowAnonymous();
         api.MapGet("/get/{id:int}", GetAsync);
+        api.MapGet("/get/all", GetAllAsync);
         api.MapPost("/create", CreateAsync);
         api.MapDelete("/delete/{id:int}", DeleteAsync);
 
@@ -52,11 +53,11 @@ public class WebHookApi
     }
 
     private static async Task<IResult> ReceiveDataTitleAsync(string token, string title, dynamic data,
-        IWebHookApplicationService webHookApplicationService,ILogger<WebHookApi> logger)
+        IWebHookApplicationService webHookApplicationService, ILogger<WebHookApi> logger)
     {
         string jsonData = Convert.ToString(data);
         logger.LogInformation(jsonData);
-        
+
         var result = await webHookApplicationService.ReceiveDataAsync(token, title, data);
         return Results.Ok(result);
     }
@@ -65,6 +66,12 @@ public class WebHookApi
     {
         var webHook = await webHookApplicationService.GetAsync(id);
         return Results.Ok(webHook);
+    }
+
+    private static async Task<IResult> GetAllAsync(IWebHookApplicationService webHookApplicationService)
+    {
+        var list = await webHookApplicationService.GetListAsync();
+        return Results.Ok(list);
     }
 
     private static async Task<IResult> CreateAsync(CreateWebHookDto input,

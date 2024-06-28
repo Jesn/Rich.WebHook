@@ -6,6 +6,14 @@ namespace Rich.WebHook.Repository.WebHookReceivers;
 
 public class WebHookReceiverRepository(ApplicationDbContext context) : IWebHookReceiverRepository
 {
+    public async Task<IEnumerable<WebHookReceiver>> GetReceiversByWebHookIds(List<int> webhookIds)
+    {
+        var list = await context.WebHookReceivers
+            .Where(x => webhookIds.Contains(x.WebHookId))
+            .ToListAsync();
+        return list;
+    }
+
     public async Task<IEnumerable<WebHookReceiver>> GetReceiversByWebHookId(int webhookId)
     {
         var list = await context.WebHookReceivers

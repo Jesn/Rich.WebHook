@@ -4,6 +4,7 @@ namespace Rich.WebHook.Repository.WebHookReceivers;
 
 public interface IWebHookReceiverRepository : IRichRepository
 {
+    Task<IEnumerable<WebHookReceiver>> GetReceiversByWebHookIds(List<int> webhookIds);
     Task<IEnumerable<WebHookReceiver>> GetReceiversByWebHookId(int webhookId);
     Task BatchAsync(List<WebHookReceiver> list);
 

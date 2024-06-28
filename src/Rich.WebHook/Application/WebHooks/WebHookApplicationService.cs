@@ -129,12 +129,12 @@ public class WebHookApplicationService(
         var userId = richSession.UserId.Value;
         var webHook = await webhookRepository.GetAsync(userId, id);
         var receivers = await webHookReceiverRepository.GetReceiversByWebHookId(id);
-        var outPut = await FillWebHookDetail(webHook, receivers);
+        var outPut = FillWebHookDetail(webHook, receivers);
 
         return outPut;
     }
 
-    private Task<WebHookDetailDto> FillWebHookDetail(WebHookSetting? webHook, IEnumerable<WebHookReceiver> receivers)
+    private WebHookDetailDto FillWebHookDetail(WebHookSetting? webHook, IEnumerable<WebHookReceiver> receivers)
     {
         if (webHook is null) throw new Exception("数据不存在");
         // var template = await templateRepository.GetAsync(webHook.TemplateId);
@@ -161,7 +161,7 @@ public class WebHookApplicationService(
                     Receivers = x.Receivers
                 }).ToList()
         };
-        return Task.FromResult(outPut);
+        return outPut;
     }
 
     public async Task<WebHookDetailDto?> GetByTokenAsync(string token)
@@ -173,8 +173,26 @@ public class WebHookApplicationService(
         }
 
         var receivers = await webHookReceiverRepository.GetReceiversByWebHookId(webHook.Id);
-        var outPut = await FillWebHookDetail(webHook, receivers);
+        var outPut = FillWebHookDetail(webHook, receivers);
         return outPut;
+    }
+
+    public async Task<IEnumerable<WebHookDetailDto>?> GetListAsync()
+    {
+        var userId = richSession.GetUserId();
+
+        // 使用 EF Core 的 Include 方法预先加载相关的 WebHookReceivers
+        var webHooksWithReceivers = await webhookRepository.GetListWithReceiversAsync(userId);
+
+        // 使用 LINQ 一次性处理所有 WebHook 和它们的 Receivers
+        var result = webHooksWithReceivers?.Select(webHook =>
+        {
+            var webhookReceivers = webHook.Receivers.ToList();
+            var detail = FillWebHookDetail(webHook, webhookReceivers);
+            return detail;
+        }).ToList();
+
+        return result;
     }
 
     public async Task DeleteAsync(int id)
