@@ -7,5 +7,6 @@ public enum ReceiveClientEnum
 {
     WeChat = 0,
     Telegram = 1,
-    Mq = 2
+    Mq = 2,
+    Http = 3
 }

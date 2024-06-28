@@ -1,5 +1,7 @@
 using System.Data;
+using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.IdentityModel.Tokens;
 using Rich.WebHook.Application.Users;
 using Rich.WebHook.Application.WebHooks.Dto;
@@ -78,7 +80,25 @@ public class WebHookApplicationService(
                 }
             }
         }
-        
+
+        if (webHookDetail.Receivers.Any(x => x.Client == ReceiveClientEnum.Http))
+        {
+            var receiverHttp = webHookDetail.Receivers.Where(x => x.Client == ReceiveClientEnum.Http);
+            foreach (var receiverItem in receiverHttp)
+            {
+                var content = new StringContent(result, Encoding.UTF8, "application/json");
+                foreach (var receiver in receiverItem.Receivers)
+                {
+                    using var client = new HttpClient();
+                    var response = await client.PostAsync(receiver, content);
+                    response.EnsureSuccessStatusCode();
+
+                    var responseBody = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine("Response: " + responseBody);
+                }
+            }
+        }
+
         return result;
     }
 
