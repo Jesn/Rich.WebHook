@@ -4,7 +4,7 @@ WORKDIR /app
 EXPOSE 80 443
 
 # 使用sdk镜像进行构建
-FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["src/Rich.WebHook/Rich.WebHook.csproj", "src/Rich.WebHook/"]
