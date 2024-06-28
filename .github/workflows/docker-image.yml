@@ -36,3 +36,8 @@ jobs:
           push: true
           tags: richpeople/webhook:latest
 
+      - name: webhook
+        run: |
+          curl -X 'POST' '${{ secrets.webhook_url }}' \
+          -H 'Content-Type: application/json' \
+          -d '{"title":"github action event","repository":"Rich.WebHook","docker_image":"richpeople/webhook:latest"}'
