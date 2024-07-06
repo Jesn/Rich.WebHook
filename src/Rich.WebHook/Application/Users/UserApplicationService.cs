@@ -1,7 +1,9 @@
 using System.Data;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.Extensions.DependencyInjection.Exceptions;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Rich.WebHook.Application.Users.Dto;
@@ -51,11 +53,11 @@ public class UserApplicationService(IUserRepository userRepository, IOptions<Jwt
     {
         var user = await userRepository.GetUserByNameAsync(userName);
         if (user is null)
-            throw new DataException("未找到该用户");
+            throw new UserFriendException(HttpStatusCode.Unauthorized, "未找到该用户");
 
         var passWordIsOk = PasswordHasher.VerifyPasswordWithSalt(passWord, user.PassWord);
         if (!passWordIsOk)
-            throw new DataException("密码不正确");
+            throw new UserFriendException(HttpStatusCode.Unauthorized, "密码不正确");
 
         var token = GenerateJwtToken(user, JwtOption);
 

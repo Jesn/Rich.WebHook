@@ -4,14 +4,26 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Rich.WebHook.Apis;
+using Rich.WebHook.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
+
+if (builder.Configuration.GetSection("AgileConfig").Exists())
+    builder.Host.UseAgileConfig();
 
 builder.Services.Configure<JsonOptions>(options =>
 {
     options.JsonSerializerOptions.Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
 });
 
+// CORS 跨域
+// builder.Services.AddCors(options =>
+// {
+//     options.AddPolicy("AllowSpecificOrigin",
+//         builder => builder.WithOrigins("http://example.com")
+//             .AllowAnyHeader()
+//             .AllowAnyMethod());
+// });
 
 builder.Services
     .AddAgileConfig1(builder.Configuration)
@@ -82,12 +94,20 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 
+// CORS 跨域
+//app.UseCors("AllowSpecificOrigin");
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseMiddleware<ExceptionHandlerMiddleware>();
+app.UseMiddleware<ResponseMiddleware>();
+
+
 
 app.UseHttpsRedirection();
 

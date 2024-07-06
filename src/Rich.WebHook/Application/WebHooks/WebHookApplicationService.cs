@@ -1,6 +1,10 @@
 using System.Data;
+using System.Net;
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Text.Json;
+using Ganss.Xss;
+using Microsoft.Extensions.DependencyInjection.Exceptions;
 using Microsoft.IdentityModel.Tokens;
 using Rich.WebHook.Application.Users;
 using Rich.WebHook.Application.WebHooks.Dto;
@@ -110,11 +114,21 @@ public class WebHookApplicationService(
 
     public async Task CreateAsync(CreateWebHookDto input)
     {
+        var sanitizer = new HtmlSanitizer();
+        var templateText = sanitizer.Sanitize(input.TemplateText);
+
+        var encodedTemplateText = HtmlEncoder.Default.Encode(templateText);
+        var template = Template.Parse(encodedTemplateText);
+        if (template.HasErrors)
+        {
+            throw new UserFriendException(HttpStatusCode.Forbidden, "模板格式有误!");
+        }
+
         var webHook = new WebHookSetting()
         {
-            UserId = richSession.UserId.Value,
+            UserId = richSession.GetUserId(),
             Title = input.Title,
-            TemplateText = input.TemplateText,
+            TemplateText = templateText,
             Remark = input.Remark,
             Token = $"{Guid.NewGuid():N}",
             CreateTime = DateTime.Now
@@ -143,11 +157,6 @@ public class WebHookApplicationService(
     private WebHookDetailDto FillWebHookDetail(WebHookSetting? webHook, IEnumerable<WebHookReceiver> receivers)
     {
         if (webHook is null) throw new Exception("数据不存在");
-        // var template = await templateRepository.GetAsync(webHook.TemplateId);
-        // if (template is null) throw new Exception("未找到模板数据");
-        // var filePath = Path.Combine(".", "Data", "WebHookTemplates", template.FileName);
-        // var templateText = await File.ReadAllTextAsync(filePath);
-
         var httpContext = httpContextAccessor.HttpContext;
         var host = $"{httpContext?.Request.Scheme}://{httpContext?.Request.Host}";
         var webHookUrl = $"{host}/api/webhook/{webHook.Token}";

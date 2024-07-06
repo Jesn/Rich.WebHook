@@ -1,3 +1,5 @@
+using System.Net;
+using Microsoft.Extensions.DependencyInjection.Exceptions;
 using Rich.WebHook.Dmain.Shared.Const;
 
 namespace Rich.WebHook.Application.Users;
@@ -41,7 +43,7 @@ public class RichSession(IHttpContextAccessor httpContextAccessor)
 
     public int GetUserId()
     {
-        if (UserId == null) throw new UnauthorizedAccessException("Token失效");
+        if (UserId == null) throw new UserFriendException(HttpStatusCode.Unauthorized, "Token已过期，请重新登录！");
         return UserId.Value;
     }
 }
