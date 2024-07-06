@@ -11,6 +11,9 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v3
+      - name: Get short commit ID
+        id: short_commit_id
+        run: echo "::set-output name=commit_id::$(git rev-parse --short HEAD)"
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -37,7 +40,7 @@ jobs:
           file: ./src/Rich.WebHook/Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: richpeople/webhook:latest,richpeople/webhook:${{github.sha}}
+          tags: richpeople/webhook:latest,richpeople/webhook:${{ steps.short_commit_id.outputs.commit_id }}
 
       - name: webhook
         run: |
