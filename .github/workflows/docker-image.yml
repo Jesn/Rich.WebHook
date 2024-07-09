@@ -38,9 +38,20 @@ jobs:
         with:
           context: .
           file: ./src/Rich.WebHook/Dockerfile
-          push: true
+          push: false
           platforms: linux/amd64,linux/arm64
           tags: richpeople/webhook:latest,richpeople/webhook:${{ steps.short_commit_id.outputs.commit_id }}
+          
+      # Slim it!
+      - uses: kitabisa/docker-slim-action@v1
+        env:
+          DSLIM_HTTP_PROBE: false
+        with:
+          target: richpeople/webhook:latest
+          tag: "slim"
+          
+      # Push to the registry
+      - run: docker image push richpeople/webhook --all-tags
 
       - name: webhook
         run: |
