@@ -11,20 +11,19 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v3
-
       - name: Get short commit ID
         id: short_commit_id
         run: echo "::set-output name=commit_id::$(git rev-parse --short HEAD)"
-
-      - name: Set up QEMU
+      -
+        name: Set up QEMU
         uses: docker/setup-qemu-action@v3
         with:
           platforms: linux/amd64,linux/arm64
-
-      - name: Set up Docker Buildx
+      -
+        name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
-      - name: Login to Docker Hub
+      -
+        name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -33,36 +32,18 @@ jobs:
       - name: Print current working directory
         run: pwd && ls -a
 
-      - name: Build Docker image
+      - name: Build and push
         id: docker_build_api
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./src/Rich.WebHook/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          tags: richpeople/webhook:latest
           push: true
+          platforms: linux/amd64,linux/arm64
+          tags: richpeople/webhook:latest,richpeople/webhook:${{ steps.short_commit_id.outputs.commit_id }}
 
-      - name: Install docker-slim
-        run: |
-          wget https://downloads.dockerslim.com/releases/1.40.11/dist_linux.tar.gz
-          tar -xvzf dist_linux.tar.gz
-          sudo mv dist_linux/docker-slim /usr/local/bin/
-          sudo mv dist_linux/docker-slim-sensor /usr/local/bin/
-
-      - name: Slim Docker image
-        run: |
-          docker pull richpeople/webhook:latest
-          docker-slim build --target richpeople/webhook:latest --tag richpeople/webhook:slim
-
-      - name: Push slim Docker image
-        run: |
-          docker push richpeople/webhook:slim
-          docker tag richpeople/webhook:slim richpeople/webhook:${{ steps.short_commit_id.outputs.commit_id }}-slim
-          docker push richpeople/webhook:${{ steps.short_commit_id.outputs.commit_id }}-slim
-
-      - name: Send webhook notification
+      - name: webhook
         run: |
           curl -X 'POST' '${{ secrets.webhook_url }}' \
           -H 'Content-Type: application/json' \
-          -d '{"title":"github action event","repository":"Rich.WebHook","docker_image":"richpeople/webhook:slim"}'
+          -d '{"title":"github action event","repository":"Rich.WebHook","docker_image":"richpeople/webhook:latest"}'
