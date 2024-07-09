@@ -50,6 +50,7 @@ jobs:
 
       - name: Slim Docker image
         run: |
+          docker images
           docker-slim build --target richpeople/webhook:latest --tag richpeople/webhook:slim
 
       - name: Push slim Docker image
