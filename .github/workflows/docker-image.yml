@@ -41,7 +41,10 @@ jobs:
           file: ./src/Rich.WebHook/Dockerfile
           platforms: linux/amd64,linux/arm64
           tags: richpeople/webhook:latest
-
+          
+      - name: Verify Docker image exists locally
+        run: docker images | grep "richpeople/webhook"
+          
       - name: Install docker-slim
         run: |
           wget https://downloads.dockerslim.com/releases/1.37.5/dist_linux.tar.gz
