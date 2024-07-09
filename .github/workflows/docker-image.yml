@@ -45,7 +45,7 @@ jobs:
 
       - name: Install docker-slim
         run: |
-          wget https://downloads.dockerslim.com/releases/1.37.5/dist_linux.tar.gz
+          wget https://downloads.dockerslim.com/releases/1.40.11/dist_linux.tar.gz
           tar -xvzf dist_linux.tar.gz
           sudo mv dist_linux/docker-slim /usr/local/bin/
           sudo mv dist_linux/docker-slim-sensor /usr/local/bin/
